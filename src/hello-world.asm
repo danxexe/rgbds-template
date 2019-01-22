@@ -4,6 +4,8 @@
 ; some tutorial-like comments stolen from "hello world" by GABY
 
 ; VERSIONS
+; 1.02 22/01/19
+;   Small cleanup by danxexe
 ; 1.01 02/09/07
 ;   fixed typos and clarified a few things in the comments
 ; 1.00 02/02/07
@@ -34,26 +36,6 @@ INCLUDE "gbhw.inc" ; standard hardware definitions from devrs.com
 
 INCLUDE "ibmpc1.inc" ; ASCII character set from devrs.com
 
-; Next we need to include some code for doing
-; RAM copy, RAM fill, etc.
-
-INCLUDE "memory.inc"
-
-; We are going to keep interrupts disabled for this program.
-; However, it is good practice to leave the reserved memory locations for interrupts with
-; executable code. It make for a nice template as well to fill in code when we use interrupts
-; in the future
-SECTION	"Vblank",HOME[$0040]
-	reti
-SECTION	"LCDC",HOME[$0048]
-	reti
-SECTION	"Timer_Overflow",HOME[$0050]
-	reti
-SECTION	"Serial",HOME[$0058]
-	reti
-SECTION	"p1thru4",HOME[$0060]
-	reti
-
 ;  Next we need to include the standard GameBoy ROM header
 ; information that goes at location $0100 in the ROM. (The
 ; $ before a number indicates that the number is a hex value.)
@@ -69,7 +51,7 @@ SECTION	"p1thru4",HOME[$0060]
 ; start at address $100 by using the following SECTION assembler
 ; command:
 
-SECTION	"start",HOME[$0100]
+SECTION	"start",ROM0[$0100]
     nop
     jp	begin
 
@@ -169,7 +151,7 @@ init:
 ; the LCD outside of VBlank.
 
 	call	StopLCD		; YOU CAN NOT LOAD $8000 WITH LCD ON
-	
+
 ;  In order to display any text on our 'canvas'
 ; we must have tiles which resemble letters that
 ; we can use for 'painting'. In order to setup
@@ -187,11 +169,11 @@ init:
 	ld	de, _VRAM		; $8000
 	ld	bc, 8*256 		; the ASCII character set: 256 characters, each with 8 bytes of display data
 	call	mem_CopyMono	; load tile data
-	
+
 ; We turn the LCD on. Parameters are explained in the I/O registers section of The GameBoy reference under I/O register LCDC
 	ld	a, LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800|LCDCF_BGON|LCDCF_OBJ16|LCDCF_OBJOFF 
-	ld	[rLCDC], a	
-	
+	ld	[rLCDC], a
+
 ; Next, we clear our 'canvas' to all white by
 ; 'setting' the canvas to ascii character $20
 ; which is a white space.
@@ -201,20 +183,6 @@ init:
 	ld	bc, SCRN_VX_B * SCRN_VY_B
 	call	mem_SetVRAM
 
-	
-; ****************************************************************************************
-; Main code:
-; Print a character string in the middle of the screen
-; ****************************************************************************************
-; Now we need to paint the message
-; " Hello World !" onto our 'canvas'. We do this with
-; one final memory copy routine call.
-
-	ld	hl,Title
-	ld	de, _SCRN0+3+(SCRN_VY_B*7) ; 
-	ld	bc, TitleEnd-Title
-	call	mem_CopyVRAM
-	
 ; ****************************************************************************************
 ; Prologue
 ; Wait patiently 'til somebody kills you
@@ -226,7 +194,7 @@ wait:
 	halt
 	nop
 	jr	wait
-	
+
 ; ****************************************************************************************
 ; hard-coded data
 ; ****************************************************************************************
