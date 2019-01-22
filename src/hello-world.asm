@@ -191,17 +191,9 @@ init:
 ; else to do. As a result, we just Jump to a label that
 ; causes an infinite loop condition to occur.
 wait:
-	halt
-	nop
+	call waitForVBlank
 	jr	wait
 
-; ****************************************************************************************
-; hard-coded data
-; ****************************************************************************************
-Title:
-	DB	"Hello World !"
-TitleEnd:
-    nop
 ; ****************************************************************************************
 ; StopLCD:
 ; turn off LCD if it is on
